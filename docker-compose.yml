@@ -6,6 +6,7 @@ services:
     image: backup:latest
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      DUMP_COMPRESS: ${DUMP_COMPRESS}
       S3_EXPIRE_TIME: ${S3_EXPIRE_TIME}
       S3_BUCKET: ${S3_BUCKET}
       S3_REGION_NAME: ${S3_REGION_NAME}

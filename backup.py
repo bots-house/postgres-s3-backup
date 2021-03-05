@@ -12,6 +12,7 @@ from loguru import logger
 @dataclasses.dataclass
 class Config:
     db_url: str
+    dump_compress: int
     s3_expire_time: int
     s3_bucket: str
     s3_region_name: str
@@ -24,6 +25,10 @@ class Config:
         db_url = os.getenv("DATABASE_URL")
         if not db_url:
             raise ValueError("please set DATABASE_URL environment")
+        
+        dump_compress = os.getenv("DUMP_COMPRESS")
+        if not dump_compress:
+            raise ValueError("please set DUMP_COMPRESS environment")
         
         s3_expire_time = os.getenv("S3_EXPIRE_TIME")
         if not s3_expire_time:
@@ -51,6 +56,7 @@ class Config:
 
         return Config(
             db_url=db_url,
+            dump_compress=int(dump_compress),
             s3_expire_time=int(s3_expire_time),
             s3_bucket=s3_bucket,
             s3_region_name=s3_region_name,
@@ -93,7 +99,7 @@ class LogPipe(threading.Thread):
         os.close(self.fdWrite)
 
 
-def dump_db(db_url: str, filename: str):
+def dump_db(config: Config, filename: str):
     logger.info("start pg_dump")
     logpipe_debug = LogPipe()
 
@@ -103,9 +109,9 @@ def dump_db(db_url: str, filename: str):
                 "pg_dump",
                 "--verbose",
                 "--format=custom",
-                "--compress=9",
+                f"--compress={config.dump_compress}",
                 f"--file={filename}",
-                db_url,
+                config.db_url,
             ],
             stdout=logpipe_debug,
             stderr=logpipe_debug,
@@ -166,7 +172,7 @@ def main():
     start_backup_at = datetime.now(timezone.utc)
 
     try:
-        dump_db(db_url=config.db_url, filename=filename)
+        dump_db(config=config, filename=filename)
     except subprocess.CalledProcessError as err:
         exit(err.returncode)
 
