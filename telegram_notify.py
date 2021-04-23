@@ -20,7 +20,7 @@ Size: {size}
 _UNSUCESSFULY_TEXT = """
 📦 Backup error! ❌
 
-Took: {took} 
+Took: {took}
 
 Checkout logs for error details.
 """

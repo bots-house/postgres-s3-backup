@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import boto3
 
@@ -13,18 +14,17 @@ from config import Config
 
 
 def dump_db(config: Config, filename: str):
-    logger.info("start pg_dump")
+    logger.info("start mysqldump")
     logpipe_debug = LogPipe()
 
     try:
         subprocess.run(
             [
-                "pg_dump",
+                "/usr/bin/mysqldump",
                 "--verbose",
-                "--format=custom",
-                f"--compress={config.dump_compress}",
-                f"--file={filename}",
-                config.db_url,
+                "-u", "root",
+                "-p", config.db_root_pwd,
+                ">", "backup.sql"
             ],
             stdout=logpipe_debug,
             stderr=logpipe_debug,
@@ -63,7 +63,7 @@ def clean_expired_dumps(config: Config, client):
         if backup["LastModified"] < border:
             logger.debug(f"delete expired dump; key={backup['Key']};")
             client.delete_object(Bucket=config.s3_bucket, Key=backup["Key"])
-        
+
 
 def upload_dump(config: Config, client, filename: str, start_backup_at: datetime):
     logger.debug("upload dump to s3")
@@ -75,7 +75,7 @@ def upload_dump(config: Config, client, filename: str, start_backup_at: datetime
         Key=key,
     )
 
-    
+
 def main():
     config = Config.parse_env()
     logger.info(config)
@@ -87,8 +87,8 @@ def main():
         dump_db(config=config, filename=filename)
     except subprocess.CalledProcessError as err:
         telegram_notify.notify(config=config, success=False, start_backup_at=start_backup_at)
-        exit(err.returncode)
-    
+        sys.exit(err.returncode)
+
     try:
         client = create_boto3_client(config=config)
 
