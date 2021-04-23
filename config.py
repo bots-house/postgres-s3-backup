@@ -10,6 +10,7 @@ from pytz.tzfile import DstTzInfo
 class Config:
     db_host: str
     db_root_pwd: str
+    db_name: str
     dump_compress: int # 6 is pg_dump default
     s3_expire_time: int
     s3_bucket: str
@@ -31,9 +32,11 @@ class Config:
         if not db_root_pwd:
             raise ValueError("please set DATABASE_URL environment")
 
-        dump_compress = os.getenv("DUMP_COMPRESS")
-        if not dump_compress:
-            raise ValueError("please set DUMP_COMPRESS environment")
+        db_name = os.getenv("DATABASE_NAME")
+        if not db_name:
+            raise ValueError("please set DATABASE_NAME env. var.")
+
+        dump_compress = 0
 
         s3_expire_time = os.getenv("S3_EXPIRE_TIME")
         if not s3_expire_time:
