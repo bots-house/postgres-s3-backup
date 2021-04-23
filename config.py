@@ -8,6 +8,7 @@ from pytz.tzfile import DstTzInfo
 
 @dataclasses.dataclass
 class Config:
+    db_host: str
     db_root_pwd: str
     dump_compress: int # 6 is pg_dump default
     s3_expire_time: int
@@ -22,6 +23,10 @@ class Config:
 
     @staticmethod
     def parse_env():
+        db_host = os.getenv("DATABASE_HOST")
+        if not db_host:
+            raise ValueError("DATABASE_HOST was not set")
+
         db_root_pwd = os.getenv("DATABASE_ROOT_PWD")
         if not db_root_pwd:
             raise ValueError("please set DATABASE_URL environment")

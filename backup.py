@@ -13,25 +13,27 @@ from config import Config
 
 
 
-def dump_db(config: Config, filename: str):
+def dump_db(config: Config, filename: str) -> bool:
+    """Returns operation state: False for non-success"""
     logger.info("start mysqldump")
-    logpipe_debug = LogPipe()
 
-    try:
-        subprocess.run(
+    status = os.system(
+      " ".join(
             [
                 "/usr/bin/mysqldump",
-                "--verbose",
+                "-h", config.db_host,
                 "-u", "root",
                 "-p", config.db_root_pwd,
-                ">", "backup.sql"
+                ">", filename,
             ],
-            stdout=logpipe_debug,
-            stderr=logpipe_debug,
-            check=True,
-        )
-    finally:
-        logpipe_debug.close()
+        ),
+    )
+    if status != 0:
+       logger.error("unkown error occurred while dumping db")
+       return False
+
+    return True
+
 
 def create_boto3_client(config: Config):
     session = boto3.session.Session()
@@ -83,11 +85,10 @@ def main():
     filename = "backup.dump"
     start_backup_at = datetime.now(config.tz)
 
-    try:
-        dump_db(config=config, filename=filename)
-    except subprocess.CalledProcessError as err:
+    state = dump_db(config=config, filename=filename)
+    if state is False:
         telegram_notify.notify(config=config, success=False, start_backup_at=start_backup_at)
-        sys.exit(err.returncode)
+        sys.exit("sucky dump")
 
     try:
         client = create_boto3_client(config=config)

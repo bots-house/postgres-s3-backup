@@ -6,6 +6,7 @@ services:
     build:
       context: .
     environment:
+      DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_ROOT_PWD: ${DATABASE_ROOT_PWD}
       DUMP_COMPRESS: ${DUMP_COMPRESS}
       S3_EXPIRE_TIME: ${S3_EXPIRE_TIME}
