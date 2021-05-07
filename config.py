@@ -41,6 +41,10 @@ class Config:
         s3_expire_time = os.getenv("S3_EXPIRE_TIME")
         if not s3_expire_time:
             raise ValueError("please set S3_EXPIRE_TIME environment")
+        try:
+            s3_expire_time = int(s3_expire_time)
+        except ValueError as e:
+            raise ValueError("S3_EXPIRE_TIME is invalid") from e
 
         s3_bucket = os.getenv("S3_BUCKET")
         if not s3_bucket:
@@ -78,16 +82,4 @@ class Config:
         if not notify_telegram_bot_chat_id:
             logger.debug("NOTIFY_TELEGRAM_BOT_CHAT_ID doesnt set")
 
-        return Config(
-            db_root_pwd=db_root_pwd,
-            dump_compress=int(dump_compress),
-            s3_expire_time=int(s3_expire_time),
-            s3_bucket=s3_bucket,
-            s3_region_name=s3_region_name,
-            s3_endpoint_url=s3_endpoint_url,
-            s3_access_key_id=s3_access_key_id,
-            s3_secret_access_key=s3_secret_access_key,
-            tz=tz,
-            notify_telegram_bot_token=notify_telegram_bot_token,
-            notify_telegram_bot_chat_id=notify_telegram_bot_chat_id,
-        )
+        return Config(**locals())
