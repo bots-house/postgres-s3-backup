@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "postgres-s3-backup"
+version = "0.1.0"
+description = ""
+authors = ["REDHAT3 <jmen.domen@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+boto3 = "1.17.21"
+loguru = "0.5.3"
+pytz = "2021.1"
+requests = "^2.26.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

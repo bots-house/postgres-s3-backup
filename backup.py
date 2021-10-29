@@ -48,7 +48,7 @@ def create_boto3_client(config: Config):
 def clean_expired_dumps(config: Config, client):
     logger.debug("clean expired dumps")
 
-    objects = client.list_objects(Bucket=config.s3_bucket)
+    objects = client.list_objects(Bucket=config.s3_bucket, Prefix="backup")
     if not objects:
         return
 
